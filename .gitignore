@@ -1,0 +1,8 @@
+out/
+generated/
+target/
+.bsp
+.idea
+.history
+.metals
+.vscode
