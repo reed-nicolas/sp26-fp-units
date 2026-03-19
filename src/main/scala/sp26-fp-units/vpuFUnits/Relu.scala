@@ -2,7 +2,6 @@ package sp26FPUnits
 
 import chisel3._
 import chisel3.util._
-import fpex._
 import sp26FPUnits._
 import sp26FPUnits.hardfloat._      
 import sp26FPUnits.hardfloat.consts._
@@ -25,7 +24,7 @@ class ReluResp(wordWidth: Int, numLanes: Int, tagWidth: Int) extends Bundle {
     val result = Vec(numLanes, UInt(wordWidth.W))
 }
 
-class Relu(BF16T: FPType, numLanes: Int = 16, tagWidth: Int = 8) extends Module {
+class Relu(BF16T: AtlasFPType, numLanes: Int = 16, tagWidth: Int = 8) extends Module {
     val io = IO(new Bundle {
         val req = Flipped(Decoupled(new ReluReq(BF16T.wordWidth, numLanes, tagWidth)))
         val resp = Decoupled(new ReluResp(BF16T.wordWidth, numLanes, tagWidth))

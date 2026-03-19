@@ -2,9 +2,8 @@ package sp26FPUnits
 
 import chisel3._
 import chisel3.util._
-import fpex._
 
-class Log2(fptype: FPType) extends Module {
+class Log2(fptype: AtlasFPType) extends Module {
   val w    = fptype.wordWidth
   val expW = fptype.expWidth
   val sigW = fptype.sigWidth 

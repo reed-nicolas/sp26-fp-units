@@ -2,10 +2,8 @@ package sp26FPUnits
 
 import chisel3._
 import chisel3.util._
-import fpex.hardfloat._
-import fpex._
 
-class ExpLUT(ports: Int, addrBits: Int, m: Int, n: Int,
+class ExLUT(ports: Int, addrBits: Int, m: Int, n: Int,
             min: Double = 0.0, max: Double = 1.0)
   extends Module {
   val io = IO(new Bundle {
