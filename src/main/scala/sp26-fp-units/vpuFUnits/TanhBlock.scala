@@ -2,7 +2,6 @@ package sp26FPUnits
 
 import chisel3._
 import chisel3.util._
-import fpex._
 
 // Tanh block returns data after a 1 cycle latency (takes 2 cycles total to get results). TODO: turn IO into ready/valid and use the AtlasFPType.
 // also experiment with pipelining
@@ -14,7 +13,7 @@ class TanhSyncBundle(alphaWidth: Int) extends Bundle {
   val alpha       = UInt(alphaWidth.W)
 }
 
-class Tanh(fptype: FPType) extends Module {
+class Tanh(fptype: AtlasFPType) extends Module {
   val w = fptype.wordWidth
   val sigW = fptype.sigWidth
   val expW = fptype.expWidth

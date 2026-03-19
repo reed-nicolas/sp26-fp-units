@@ -90,6 +90,7 @@ final case class AtlasFPType(
     out.isNaN := false.B
     out.isInf := false.B
     out.isZero := false.B
+    // out.isSubNorm := false.B
     out.sign := false.B
 
     val expBias = (1 << expWidth).S((expWidth + 2).W)

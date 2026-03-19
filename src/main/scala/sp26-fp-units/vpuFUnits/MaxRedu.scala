@@ -2,7 +2,6 @@ package sp26FPUnits
 
 import chisel3._
 import chisel3.util._
-import fpex._
 import hardfloat._      
 
 // Input bundles
@@ -22,7 +21,7 @@ class MaxReduResp(wordWidth: Int, numLanes: Int, tagWidth: Int) extends Bundle {
 }
 
 
-class MaxRedu(fptype: FPType, numLanes: Int = 16, tagWidth: Int = 8) extends Module {
+class MaxRedu(fptype: AtlasFPType, numLanes: Int = 16, tagWidth: Int = 8) extends Module {
   val w = fptype.wordWidth
   val expW = fptype.expWidth
   val fracW = w - 1 - expW // Width of the mantissa/fraction (excluding hidden bit)

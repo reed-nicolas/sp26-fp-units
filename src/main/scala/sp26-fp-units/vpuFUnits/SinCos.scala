@@ -2,8 +2,8 @@ package sp26FPUnits
 
 import chisel3._
 import chisel3.util._
-import fpex.hardfloat._
-import fpex._
+import sp26FPUnits.hardfloat._
+import sp26FPUnits._
 
 trait HasSinCosParams {
     def numFP16Lanes = 16
@@ -42,7 +42,7 @@ class SinCosResp(wordWidth: Int, numLanes: Int, tagWidth: Int) extends Bundle {
     val result = Vec(numLanes, UInt(wordWidth.W))
 }
 
-class SinCos(BF16T: FPType, numLanes: Int = 16, tagWidth: Int = 16) extends Module with HasSinCosParams {
+class SinCos(BF16T: AtlasFPType, numLanes: Int = 16, tagWidth: Int = 16) extends Module with HasSinCosParams {
     val io = IO(new Bundle {
         val req = Flipped(Decoupled(new SinCosReq(BF16T.wordWidth, numLanes, tagWidth)))
         val resp = Decoupled(new SinCosResp(BF16T.wordWidth, numLanes, tagWidth))

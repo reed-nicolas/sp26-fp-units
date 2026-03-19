@@ -2,7 +2,6 @@ package sp26FPUnits
 
 import chisel3._
 import chisel3.util._
-import fpex._
 import hardfloat._
 
 // LUT used for both sin and cos, since we can leverage the identity sin(x) = cos(pi/2 - x)
