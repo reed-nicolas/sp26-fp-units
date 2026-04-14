@@ -135,13 +135,31 @@ class Tanh(fptype: AtlasFPType) extends Module {
   val normShift  = leadingZeros 
   val normalized = (magFixed << normShift)(n, 0)
   
-  // Safely extract mantissa by padding to avoid negative slice indices
-  val paddedNormalized = Cat(normalized, 0.U(sigW.W))
-  val resMantissa = paddedNormalized(n + sigW - 1, n + sigW - (sigW - 1))
+  // Round the normalized fixed-point magnitude to BF16's fraction width.
+  val fracW = sigW - 1
+  val fracHi = n - 1
+  val fracLo = n - fracW
+  val fracPre =
+    if (fracLo >= 0) normalized(fracHi, fracLo)
+    else Cat(normalized(fracHi, 0), 0.U((-fracLo).W))
+  val guardBit =
+    if ((fracLo - 1) >= 0) normalized(fracLo - 1)
+    else false.B
+  val roundBit =
+    if ((fracLo - 2) >= 0) normalized(fracLo - 2)
+    else false.B
+  val stickyBit =
+    if ((fracLo - 3) >= 0) normalized(fracLo - 3, 0).orR
+    else false.B
+  val roundUp = guardBit && (roundBit || stickyBit || fracPre(0))
+  val roundedFracWide = Cat(0.U(1.W), fracPre) + roundUp
+  val mantissaCarry = roundedFracWide(fracW)
+  val roundedMantissa = Mux(mantissaCarry, 0.U(fracW.W), roundedFracWide(fracW - 1, 0))
+  val roundedRawExp = Mux(mantissaCarry, resRawExp + 1.U, resRawExp)
 
   // Use stage2.bits.isZero to forward zero cases correctly
-  val finalRawExp   = Mux(stage2.bits.isZero, 0.U, resRawExp)
-  val finalMantissa = Mux(stage2.bits.isZero || underflow || magFixed === 0.U, 0.U, resMantissa)
+  val finalRawExp   = Mux(stage2.bits.isZero, 0.U, roundedRawExp)
+  val finalMantissa = Mux(stage2.bits.isZero || underflow || magFixed === 0.U, 0.U, roundedMantissa)
 
   // Re-attach the delayed sign bit
   io.result := Cat(stage2.bits.sign, finalRawExp(expW - 1, 0), finalMantissa)
