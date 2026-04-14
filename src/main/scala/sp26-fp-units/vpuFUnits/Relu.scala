@@ -26,25 +26,14 @@ class ReluResp(wordWidth: Int, numLanes: Int, tagWidth: Int) extends Bundle {
 
 class Relu(BF16T: AtlasFPType, numLanes: Int = 16, tagWidth: Int = 8) extends Module {
     val io = IO(new Bundle {
-        val req = Flipped(Decoupled(new ReluReq(BF16T.wordWidth, numLanes, tagWidth)))
-        val resp = Decoupled(new ReluResp(BF16T.wordWidth, numLanes, tagWidth))
+        val req = Flipped(Valid(new ReluReq(BF16T.wordWidth, numLanes, tagWidth)))
+        val resp = Valid(new ReluResp(BF16T.wordWidth, numLanes, tagWidth))
     })
 
-    // latch inputs
-    val validReg = RegInit(false.B)
-    val reqReg   = Reg(new ReluReq(BF16T.wordWidth, numLanes, tagWidth))
-
-    // Ready if our register is empty or if the downstream is currently accepting the data
-    io.req.ready := !validReg || io.resp.ready
-
-    // Update validReg: 
-    // Set to true if a new request comes in. 
-    // Set to false if we are sending data and no new request is arriving.
-    when (io.req.fire) {
-        validReg := true.B
-        reqReg   := io.req.bits
-    } .elsewhen (io.resp.ready) {
-        validReg := false.B
+    // Software-scheduled interface: no backpressure, just a one-cycle pipeline.
+    val reqReg = Reg(new ReluReq(BF16T.wordWidth, numLanes, tagWidth))
+    when (io.req.valid) {
+        reqReg := io.req.bits
     }
 
     // LOGIC for relu operation
@@ -58,7 +47,7 @@ class Relu(BF16T: AtlasFPType, numLanes: Int = 16, tagWidth: Int = 8) extends Mo
     }
     
     // output signals
-    io.resp.valid := validReg
+    io.resp.valid := RegNext(io.req.valid, false.B)
     io.resp.bits.tag := reqReg.tag
     io.resp.bits.laneMask := reqReg.laneMask
     io.resp.bits.whichBank := reqReg.whichBank
